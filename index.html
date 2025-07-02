@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Clinical Notes Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .form-section { 
+      display: none;
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    textarea {
+      height: 200px;
+      margin: 20px 0;
+      font-family: monospace;
+    }
+    button {
+      background: #0078d7;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 10px 5px 10px 0;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button.secondary {
+      background: #666;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    .template-options {
+      margin: 15px 0;
+    }
+    h2 {
+      color: #2c3e50;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .phq-question {
+      margin-bottom: 15px;
+    }
+    .default-value {
+      color: #666;
+      font-style: italic;
+      font-size: 0.9em;
+    }
+    .positive-findings {
+      background-color: #fff9e6;
+    }
+    .two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .system-group {
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed #eee;
+    }
+  </style>
+</head>
+<body>
+  <h1>Clinical Notes Generator</h1>
+  
+  <label for="note-type">Note Type:</label>
+  <select id="note-type" onchange="showForm()">
+    <option value="">-- Select --</option>
+    <option value="review">Review of Systems</option>
+    <option value="physical">Physical Examination</option>
+    <option value="depression">Depression Screening</option>
+    <option value="counseling">Patient Counseling</option>
+    <option value="gyn">Gynecological Exam</option>
+    <option value="foot">Foot Exam</option>
+    <option value="labs">Lab Results</option>
+  </select>
+
+  <!-- Review of Systems -->
+  <div id="review-form" class="form-section">
+    <h2>Review of Systems</h2>
+    <div class="template-options">
+      <button onclick="loadTemplate('review-normal')">Load Default ROS</button>
+      <button class="secondary" onclick="clearForm('review')">Clear Form</button>
+    </div>
+    
+    <div class="two-column">
+      <div>
+        <div class="system-group">
+          <h3>General</h3>
+          <label for="ros-constitutional">Constitutional: <span class="default-value">(Leave blank if negative)</span></label>
+          <input type="text" id="ros-constitutional" class="positive-findings" placeholder="Enter positive findings">
+          
+          <label for="ros-heent">HEENT: <span class="default-value">(Leave blank if negative)</span></label>
+          <input type="text" id="ros-heent" class="positive-findings" placeholder="Enter positive findings">
+        </div>
+        
+        <div class="system-group">
+          <h3>Cardiovascular</h3>
+          <label for="ros-cv">Cardiovascular: <span class="default-value">(Leave blank if negative)</span></label>
+          <input type="text" id="ros-cv" class="positive-findings" placeholder="Enter positive findings">
+        </div>
+        
+        <div class="system-group">
+          <h3>Respiratory</h3>
+          <label for="ros-respiratory">Respiratory: <span class="default-value">(Leave blank if negative)</span></label>
+          <input type="text" id="ros-respiratory" class="positive-findings" placeholder="Enter positive findings">
+        </div>
+      </div>
+      
+      <div>
+        <div class="system-group">
+          <h3>Gastrointestinal</h3>
+          <label for="ros-gi">Gastrointestinal: <span class="default-value">(Leave blank if negative)</span></label>
+          <input type="text" id="ros-gi" class="positive-findings" placeholder="Enter positive findings">
+        </div>
+        
+        <div class="system-group">
+          <h3>Genitourinary</h3>
+          <label for="ros-gu">Genitourinary: <span class="default-value">(Leave blank if negative)</span></label>
+          <input type="text" id="ros-gu" class="positive-findings" placeholder="Enter positive findings">
+        </div>
+        
+        <div class="system-group">
+          <h3>Musculoskeletal</h3>
+          <label for="ros-ms">Musculoskeletal: <span class="default-value">(Leave blank if negative)</span></label>
+          <input type="text" id="ros-ms" class="positive-findings" placeholder="Enter positive findings">
+        </div>
+        
+        <div class="system-group">
+          <h3>Neurological</h3>
+          <label for="ros-neuro">Neurological: <span class="default-value">(Leave blank if negative)</span></label>
+          <input type="text" id="ros-neuro" class="positive-findings" placeholder="Enter positive findings">
+        </div>
+      </div>
+    </div>
+    
+    <label for="ros-notes">Additional Notes:</label>
+    <textarea id="ros-notes" rows="3"></textarea>
+  </div>
+
+  <!-- Physical Examination -->
+  <div id="physical-form" class="form-section">
+    <h2>Physical Examination</h2>
+    <div class="template-options">
+      <button onclick="loadTemplate('physical-normal')">Load Default Exam</button>
+      <button class="secondary" onclick="clearForm('physical')">Clear Form</button>
+    </div>
+    
+    <div class="two-column">
+      <div>
+        <div class="system-group">
+          <h3>General</h3>
+          <label for="pe-general">Appearance: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="pe-general" class="positive-findings" placeholder="Enter abnormal findings">
+          
+          <label for="pe-vitals">Vitals: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="pe-vitals" class="positive-findings" placeholder="Enter abnormal values">
+        </div>
+        
+        <div class="system-group">
+          <h3>HEENT</h3>
+          <label for="pe-heent">HEENT: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="pe-heent" class="positive-findings" placeholder="Enter abnormal findings">
+        </div>
+        
+        <div class="system-group">
+          <h3>Neck</h3>
+          <label for="pe-neck">Neck: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="pe-neck" class="positive-findings" placeholder="Enter abnormal findings">
+        </div>
+      </div>
+      
+      <div>
+        <div class="system-group">
+          <h3>Chest/Lungs</h3>
+          <label for="pe-lungs">Lungs: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="pe-lungs" class="positive-findings" placeholder="Enter abnormal findings">
+        </div>
+        
+        <div class="system-group">
+          <h3>Cardiovascular</h3>
+          <label for="pe-cv">CV: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="pe-cv" class="positive-findings" placeholder="Enter abnormal findings">
+        </div>
+        
+        <div class="system-group">
+          <h3>Abdomen</h3>
+          <label for="pe-abd">Abdomen: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="pe-abd" class="positive-findings" placeholder="Enter abnormal findings">
+        </div>
+        
+        <div class="system-group">
+          <h3>Extremities</h3>
+          <label for="pe-ext">Extremities: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="pe-ext" class="positive-findings" placeholder="Enter abnormal findings">
+        </div>
+      </div>
+    </div>
+    
+    <label for="pe-neuro">Neurological: <span class="default-value">(Leave blank if normal)</span></label>
+    <input type="text" id="pe-neuro" class="positive-findings" placeholder="Enter abnormal findings">
+    
+    <label for="pe-skin">Skin: <span class="default-value">(Leave blank if normal)</span></label>
+    <input type="text" id="pe-skin" class="positive-findings" placeholder="Enter abnormal findings">
+    
+    <label for="pe-notes">Additional Notes:</label>
+    <textarea id="pe-notes" rows="3"></textarea>
+  </div>
+
+  <!-- Depression Screening -->
+  <div id="depression-form" class="form-section">
+    <h2>Depression Screening (PHQ-9)</h2>
+    <div class="template-options">
+      <button onclick="loadTemplate('depression-normal')">Load Default PHQ-9</button>
+      <button class="secondary" onclick="clearForm('depression')">Clear Form</button>
+    </div>
+    
+    <div class="phq-question">
+      <label>1. Little interest or pleasure in doing things:</label>
+      <select id="phq1">
+        <option value="0" selected>Not at all (0)</option>
+        <option value="1">Several days (1)</option>
+        <option value="2">More than half the days (2)</option>
+        <option value="3">Nearly every day (3)</option>
+      </select>
+    </div>
+    
+    <div class="phq-question">
+      <label>2. Feeling down, depressed or hopeless:</label>
+      <select id="phq2">
+        <option value="0" selected>Not at all (0)</option>
+        <option value="1">Several days (1)</option>
+        <option value="2">More than half the days (2)</option>
+        <option value="3">Nearly every day (3)</option>
+      </select>
+    </div>
+    
+    <div class="phq-question">
+      <label>3. Trouble falling/staying asleep or sleeping too much:</label>
+      <select id="phq3">
+        <option value="0" selected>Not at all (0)</option>
+        <option value="1">Several days (1)</option>
+        <option value="2">More than half the days (2)</option>
+        <option value="3">Nearly every day (3)</option>
+      </select>
+    </div>
+    
+    <div class="phq-question">
+      <label>4. Feeling tired or having little energy:</label>
+      <select id="phq4">
+        <option value="0" selected>Not at all (0)</option>
+        <option value="1">Several days (1)</option>
+        <option value="2">More than half the days (2)</option>
+        <option value="3">Nearly every day (3)</option>
+      </select>
+    </div>
+    
+    <div class="phq-question">
+      <label>5. Poor appetite or overeating:</label>
+      <select id="phq5">
+        <option value="0" selected>Not at all (0)</option>
+        <option value="1">Several days (1)</option>
+        <option value="2">More than half the days (2)</option>
+        <option value="3">Nearly every day (3)</option>
+      </select>
+    </div>
+    
+    <div class="phq-question">
+      <label>6. Feeling bad about yourself or that you're a failure:</label>
+      <select id="phq6">
+        <option value="0" selected>Not at all (0)</option>
+        <option value="1">Several days (1)</option>
+        <option value="2">More than half the days (2)</option>
+        <option value="3">Nearly every day (3)</option>
+      </select>
+    </div>
+    
+    <div class="phq-question">
+      <label>7. Trouble concentrating on things:</label>
+      <select id="phq7">
+        <option value="0" selected>Not at all (0)</option>
+        <option value="1">Several days (1)</option>
+        <option value="2">More than half the days (2)</option>
+        <option value="3">Nearly every day (3)</option>
+      </select>
+    </div>
+    
+    <div class="phq-question">
+      <label>8. Moving/speaking slowly or being fidgety/restless:</label>
+      <select id="phq8">
+        <option value="0" selected>Not at all (0)</option>
+        <option value="1">Several days (1)</option>
+        <option value="2">More than half the days (2)</option>
+        <option value="3">Nearly every day (3)</option>
+      </select>
+    </div>
+    
+    <div class="phq-question">
+      <label>9. Thoughts of being better off dead or hurting yourself:</label>
+      <select id="phq9">
+        <option value="0" selected>Not at all (0)</option>
+        <option value="1">Several days (1)</option>
+        <option value="2">More than half the days (2)</option>
+        <option value="3">Nearly every day (3)</option>
+      </select>
+    </div>
+    
+    <label for="phq-total">Total Score:</label>
+    <input type="text" id="phq-total" readonly>
+    
+    <label for="phq-interpretation">Interpretation:</label>
+    <input type="text" id="phq-interpretation" readonly>
+    
+    <label for="phq-notes">Additional Notes:</label>
+    <textarea id="phq-notes" rows="3"></textarea>
+  </div>
+
+  <!-- Patient Counseling -->
+  <div id="counseling-form" class="form-section">
+    <h2>Patient Counseling</h2>
+    <div class="template-options">
+      <button onclick="loadTemplate('counseling-normal')">Load Default Counseling</button>
+      <button class="secondary" onclick="clearForm('counseling')">Clear Form</button>
+    </div>
+    
+    <label for="counseling-topic">Topic:</label>
+    <select id="counseling-topic">
+      <option value="weight">Weight Reduction</option>
+      <option value="smoking">Smoking Cessation</option>
+      <option value="diet">Healthy Diet</option>
+      <option value="activity">Physical Activity</option>
+      <option value="advance">Advance Directives</option>
+      <option value="other">Other</option>
+    </select>
+    
+    <div id="counseling-topic-other-container" style="display:none;">
+      <label for="counseling-topic-other">Specify Topic:</label>
+      <input type="text" id="counseling-topic-other">
+    </div>
+    
+    <label for="counseling-duration">Duration (minutes):</label>
+    <input type="number" id="counseling-duration" min="1" max="60" value="10">
+    
+    <label for="counseling-details">Details:</label>
+    <textarea id="counseling-details" rows="4" placeholder="Enter counseling details"></textarea>
+    
+    <label for="counseling-cpt">CPT Code:</label>
+    <input type="text" id="counseling-cpt" placeholder="e.g., 99406, G0447">
+    
+    <label for="counseling-notes">Additional Notes:</label>
+    <textarea id="counseling-notes" rows="3"></textarea>
+  </div>
+
+  <!-- Gynecological Exam -->
+  <div id="gyn-form" class="form-section">
+    <h2>Gynecological Exam</h2>
+    <div class="template-options">
+      <button onclick="loadTemplate('gyn-normal')">Load Default GYN Exam</button>
+      <button class="secondary" onclick="clearForm('gyn')">Clear Form</button>
+    </div>
+    
+    <label for="gyn-consent">Consent Obtained:</label>
+    <select id="gyn-consent">
+      <option value="yes" selected>Yes</option>
+      <option value="no">No</option>
+    </select>
+    
+    <label for="gyn-chaperone">Chaperone Present:</label>
+    <select id="gyn-chaperone">
+      <option value="yes" selected>Yes</option>
+      <option value="no">No</option>
+    </select>
+    
+    <div class="system-group">
+      <h3>Exam Findings</h3>
+      <label for="gyn-external">External Genitalia: <span class="default-value">(Leave blank if normal)</span></label>
+      <input type="text" id="gyn-external" class="positive-findings" placeholder="Enter abnormal findings">
+      
+      <label for="gyn-speculum">Speculum Exam: <span class="default-value">(Leave blank if normal)</span></label>
+      <input type="text" id="gyn-speculum" class="positive-findings" placeholder="Enter abnormal findings">
+      
+      <label for="gyn-bimanual">Bimanual Exam: <span class="default-value">(Leave blank if normal)</span></label>
+      <input type="text" id="gyn-bimanual" class="positive-findings" placeholder="Enter abnormal findings">
+    </div>
+    
+    <label for="gyn-education">Patient Education:</label>
+    <textarea id="gyn-education" rows="3"></textarea>
+    
+    <label for="gyn-notes">Additional Notes:</label>
+    <textarea id="gyn-notes" rows="3"></textarea>
+  </div>
+
+  <!-- Foot Exam -->
+  <div id="foot-form" class="form-section">
+    <h2>Foot Exam</h2>
+    <div class="template-options">
+      <button onclick="loadTemplate('foot-normal')">Load Default Foot Exam</button>
+      <button class="secondary" onclick="clearForm('foot')">Clear Form</button>
+    </div>
+    
+    <div class="system-group">
+      <h3>Inspection</h3>
+      <label for="foot-inspection">Findings: <span class="default-value">(Leave blank if normal)</span></label>
+      <input type="text" id="foot-inspection" class="positive-findings" placeholder="Enter abnormal findings">
+    </div>
+    
+    <div class="system-group">
+      <h3>Vascular</h3>
+      <label for="foot-vascular">Findings: <span class="default-value">(Leave blank if normal)</span></label>
+      <input type="text" id="foot-vascular" class="positive-findings" placeholder="Enter abnormal findings">
+    </div>
+    
+    <div class="system-group">
+      <h3>Neurological</h3>
+      <label for="foot-neuro">Findings: <span class="default-value">(Leave blank if normal)</span></label>
+      <input type="text" id="foot-neuro" class="positive-findings" placeholder="Enter abnormal findings">
+      
+      <label for="foot-monofilament">Monofilament Test:</label>
+      <select id="foot-monofilament">
+        <option value="normal" selected>Normal sensation</option>
+        <option value="reduced">Reduced sensation</option>
+        <option value="absent">Absent sensation</option>
+      </select>
+    </div>
+    
+    <label for="foot-notes">Additional Notes:</label>
+    <textarea id="foot-notes" rows="3"></textarea>
+  </div>
+
+  <!-- Lab Results -->
+  <div id="labs-form" class="form-section">
+    <h2>Lab Results</h2>
+    <div class="template-options">
+      <button onclick="loadTemplate('labs-normal')">Load Default Normal Labs</button>
+      <button class="secondary" onclick="clearForm('labs')">Clear Form</button>
+    </div>
+    
+    <div class="two-column">
+      <div>
+        <div class="system-group">
+          <h3>CBC</h3>
+          <label for="labs-wbc">WBC: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="labs-wbc" class="positive-findings" placeholder="Enter abnormal value">
+          
+          <label for="labs-hgb">Hgb: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="labs-hgb" class="positive-findings" placeholder="Enter abnormal value">
+          
+          <label for="labs-hct">Hct: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="labs-hct" class="positive-findings" placeholder="Enter abnormal value">
+          
+          <label for="labs-plt">Platelets: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="labs-plt" class="positive-findings" placeholder="Enter abnormal value">
+        </div>
+      </div>
+      
+      <div>
+        <div class="system-group">
+          <h3>CMP</h3>
+          <label for="labs-glucose">Glucose: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="labs-glucose" class="positive-findings" placeholder="Enter abnormal value">
+          
+          <label for="labs-bun">BUN: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="labs-bun" class="positive-findings" placeholder="Enter abnormal value">
+          
+          <label for="labs-creat">Creatinine: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="labs-creat" class="positive-findings" placeholder="Enter abnormal value">
+          
+          <label for="labs-na">Sodium: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="labs-na" class="positive-findings" placeholder="Enter abnormal value">
+          
+          <label for="labs-k">Potassium: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="labs-k" class="positive-findings" placeholder="Enter abnormal value">
+        </div>
+      </div>
+    </div>
+    
+    <div class="system-group">
+      <h3>Lipid Panel</h3>
+      <div class="two-column">
+        <div>
+          <label for="labs-chol">Cholesterol: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="labs-chol" class="positive-findings" placeholder="Enter abnormal value">
+          
+          <label for="labs-hdl">HDL: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="labs-hdl" class="positive-findings" placeholder="Enter abnormal value">
+        </div>
+        <div>
+          <label for="labs-ldl">LDL: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="labs-ldl" class="positive-findings" placeholder="Enter abnormal value">
+          
+          <label for="labs-trig">Triglycerides: <span class="default-value">(Leave blank if normal)</span></label>
+          <input type="text" id="labs-trig" class="positive-findings" placeholder="Enter abnormal value">
+        </div>
+      </div>
+    </div>
+    
+    <label for="labs-other">Other Results:</label>
+    <textarea id="labs-other" rows="3" placeholder="Enter other lab results"></textarea>
+    
+    <label for="labs-notes">Additional Notes:</label>
+    <textarea id="labs-notes" rows="3"></textarea>
+  </div>
+
+  <!-- Output Area -->
+  <div class="output-actions">
+    <button onclick="generateNote()">Generate Note</button>
+    <button onclick="clearAll()">Clear All</button>
+    <button onclick="copyToClipboard()">Copy to Clipboard</button>
+  </div>
+  <textarea id="output" placeholder="Your generated note will appear here..." readonly></textarea>
+
+  <script>
+    // Default templates
+    const templates = {
+      'review-normal': {
+        'ros-constitutional': '',
+        'ros-heent': '',
+        'ros-cv': '',
+        'ros-respiratory': '',
+        'ros-gi': '',
+        'ros-gu': '',
+        'ros-ms': '',
+        'ros-neuro': '',
+        'ros-notes': ''
+      },
+      
+      'physical-normal': {
+        'pe-general': '',
+        'pe-vitals': '',
+        'pe-heent': '',
+        'pe-neck': '',
+        'pe-lungs': '',
+        'pe-cv': '',
+        'pe-abd': '',
+        'pe-ext': '',
+        'pe-neuro': '',
+        'pe-skin': '',
+        'pe-notes': ''
+      },
+      
+      'depression-normal': {
+        'phq1': '0',
+        'phq2': '0',
+        'phq3': '0',
+        'phq4': '0',
+        'phq5': '0',
+        'phq6': '0',
+        'phq7': '0',
+        'phq8': '0',
+        'phq9': '0',
+        'phq-notes': ''
+      },
+      
+      'counseling-normal': {
+        'counseling-topic': 'diet',
+        'counseling-duration': '15',
+        'counseling-details': 'Discussed healthy eating habits and benefits of balanced diet.',
+        'counseling-cpt': 'G0447',
+        'counseling-notes': ''
+      },
+      
+      'gyn-normal': {
+        'gyn-external': '',
+        'gyn-speculum': '',
+        'gyn-bimanual': '',
+        'gyn-education': 'Informed patient about possible mild spotting for 1-2 days post-procedure.',
+        'gyn-notes': ''
+      },
+      
+      'foot-normal': {
+        'foot-inspection': '',
+        'foot-vascular': '',
+        'foot-neuro': '',
+        'foot-monofilament': 'normal',
+        'foot-notes': ''
+      },
+      
+      'labs-normal': {
+        'labs-wbc': '',
+        'labs-hgb': '',
+        'labs-hct': '',
+        'labs-plt': '',
+        'labs-glucose': '',
+        'labs-bun': '',
+        'labs-creat': '',
+        'labs-na': '',
+        'labs-k': '',
+        'labs-chol': '',
+        'labs-hdl': '',
+        'labs-ldl': '',
+        'labs-trig': '',
+        'labs-other': '',
+        'labs-notes': ''
+      }
+    };
+
+    // Default values for empty fields
+    const defaults = {
+      review: {
+        'ros-constitutional': 'Negative for weakness, fever, chills, weight loss',
+        'ros-heent': 'Negative for headache, dizziness, visual changes, hearing loss, sore throat',
+        'ros-cv': 'Negative for chest pain, palpitations, edema',
+        'ros-respiratory': 'Negative for cough, shortness of breath, wheezing',
+        'ros-gi': 'Negative for abdominal pain, nausea, vomiting, diarrhea, constipation',
+        'ros-gu': 'Negative for dysuria, hematuria, frequency, urgency',
+        'ros-ms': 'Negative for joint pain, swelling, stiffness',
+        'ros-neuro': 'Negative for numbness, tingling, weakness, coordination problems'
+      },
+      physical: {
+        'pe-general': 'Well-developed, well-nourished, no acute distress',
+        'pe-vitals': 'Within normal limits',
+        'pe-heent': 'Normocephalic, atraumatic. PERRLA, EOMI. TMs clear. Oropharynx clear',
+        'pe-neck': 'Supple, no lymphadenopathy, no thyromegaly',
+        'pe-lungs': 'Clear to auscultation bilaterally, no wheezes/rales/rhonchi',
+        'pe-cv': 'Regular rate and rhythm, no murmurs/rubs/gallops',
+        'pe-abd': 'Soft, non-tender, non-distended, no hepatosplenomegaly',
+        'pe-ext': 'No edema, clubbing, or cyanosis',
+        'pe-neuro': 'Alert and oriented x3, cranial nerves II-XII intact',
+        'pe-skin': 'No rashes, lesions, or abnormal pigmentation'
+      },
+      gyn: {
+        'gyn-external': 'No lesions, swelling, or discoloration',
+        'gyn-speculum': 'Normal vaginal mucosa, cervix appears normal without lesions or discharge',
+        'gyn-bimanual': 'Uterus normal size, shape, and position. No adnexal tenderness or masses'
+      },
+      foot: {
+        'foot-inspection': 'No ulcers, calluses, or deformities noted',
+        'foot-vascular': 'Pedal pulses 2+ bilaterally, no bruits',
+        'foot-neuro': 'Sensation intact to light touch'
+      },
+      labs: {
+        'labs-wbc': '4.5-11.0 x10³/μL',
+        'labs-hgb': '12.0-16.0 g/dL (F), 13.5-17.5 g/dL (M)',
+        'labs-hct': '36-46% (F), 41-53% (M)',
+        'labs-plt': '150-450 x10³/μL',
+        'labs-glucose': '70-99 mg/dL (fasting)',
+        'labs-bun': '7-20 mg/dL',
+        'labs-creat': '0.5-1.1 mg/dL (F), 0.7-1.3 mg/dL (M)',
+        'labs-na': '135-145 mEq/L',
+        'labs-k': '3.5-5.0 mEq/L',
+        'labs-chol': '<200 mg/dL',
+        'labs-hdl': '>40 mg/dL (M), >50 mg/dL (F)',
+        'labs-ldl': '<100 mg/dL (optimal)',
+        'labs-trig': '<150 mg/dL'
+      }
+    };
+
+    // Show selected form
+    function showForm() {
+      document.querySelectorAll('.form-section').forEach(form => {
+        form.style.display = 'none';
+      });
+
+      const noteType = document.getElementById('note-type').value;
+      if (noteType) {
+        document.getElementById(`${noteType}-form`).style.display = 'block';
+      }
+      
+      // Show/hide other topic field for counseling
+      if (noteType === 'counseling') {
+        document.getElementById('counseling-topic').addEventListener('change', function() {
+          const otherContainer = document.getElementById('counseling-topic-other-container');
+          otherContainer.style.display = this.value === 'other' ? 'block' : 'none';
+        });
+      }
+    }
+
+    // Load templates
+    function loadTemplate(templateId) {
+      const template = templates[templateId];
+      if (!template) return;
+      
+      for (const [key, value] of Object.entries(template)) {
+        const element = document.getElementById(key);
+        if (element) {
+          if (element.tagName === 'SELECT') {
+            for (let i = 0; i < element.options.length; i++) {
+              if (element.options[i].value === value) {
+                element.selectedIndex = i;
+                break;
+              }
+            }
+          } else {
+            element.value = value;
+          }
+        }
+      }
+      
+      // Special case for PHQ-9 to calculate score
+      if (templateId === 'depression-normal') {
+        calculatePHQ();
+      }
+    }
+
+    // Clear specific form
+    function clearForm(formType) {
+      if (formType === 'review') {
+        ['ros-constitutional', 'ros-heent', 'ros-cv', 'ros-respiratory', 'ros-gi', 'ros-gu', 'ros-ms', 'ros-neuro', 'ros-notes'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+      }
+      else if (formType === 'physical') {
+        ['pe-general', 'pe-vitals', 'pe-heent', 'pe-neck', 'pe-lungs', 'pe-cv', 'pe-abd', 'pe-ext', 'pe-neuro', 'pe-skin', 'pe-notes'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+      }
+      else if (formType === 'depression') {
+        for (let i = 1; i <= 9; i++) {
+          document.getElementById(`phq${i}`).value = '0';
+        }
+        document.getElementById('phq-notes').value = '';
+        calculatePHQ();
+      }
+      else if (formType === 'counseling') {
+        document.getElementById('counseling-topic').value = 'diet';
+        document.getElementById('counseling-duration').value = '10';
+        document.getElementById('counseling-details').value = '';
+        document.getElementById('counseling-cpt').value = '';
+        document.getElementById('counseling-notes').value = '';
+        document.getElementById('counseling-topic-other-container').style.display = 'none';
+        document.getElementById('counseling-topic-other').value = '';
+      }
+      else if (formType === 'gyn') {
+        ['gyn-external', 'gyn-speculum', 'gyn-bimanual', 'gyn-education', 'gyn-notes'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('gyn-consent').value = 'yes';
+        document.getElementById('gyn-chaperone').value = 'yes';
+      }
+      else if (formType === 'foot') {
+        ['foot-inspection', 'foot-vascular', 'foot-neuro', 'foot-notes'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('foot-monofilament').value = 'normal';
+      }
+      else if (formType === 'labs') {
+        ['labs-wbc', 'labs-hgb', 'labs-hct', 'labs-plt', 'labs-glucose', 'labs-bun', 'labs-creat', 
+         'labs-na', 'labs-k', 'labs-chol', 'labs-hdl', 'labs-ldl', 'labs-trig', 'labs-other', 'labs-notes'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+      }
+    }
+
+    // Clear all forms
+    function clearAll() {
+      document.querySelectorAll('input, textarea').forEach(field => {
+        if (field.id !== 'output') {
+          field.value = '';
+        }
+      });
+      
+      document.querySelectorAll('select').forEach(select => {
+        select.selectedIndex = 0;
+      });
+      
+      document.querySelectorAll('.form-section').forEach(form => {
+        form.style.display = 'none';
+      });
+      
+      document.getElementById('note-type').selectedIndex = 0;
+    }
+
+    // Get field value or default
+    function getValueOrDefault(id, section) {
+      const element = document.getElementById(id);
+      if (!element) return '';
+      
+      const value = element.value.trim();
+      if (value === '' && defaults[section] && defaults[section][id]) {
+        return defaults[section][id];
+      }
+      return value || (section === 'review' ? 'Negative' : 'Normal');
+    }
+
+    // Calculate PHQ-9 score
+    function calculatePHQ() {
+      let total = 0;
+      for (let i = 1; i <= 9; i++) {
+        total += parseInt(document.getElementById(`phq${i}`).value);
+      }
+      
+      document.getElementById('phq-total').value = total;
+      
+      let interpretation = "";
+      if (total >= 20) interpretation = "Severe Depression";
+      else if (total >= 15) interpretation = "Moderately Severe Depression";
+      else if (total >= 10) interpretation = "Moderate Depression";
+      else if (total >= 5) interpretation = "Mild Depression";
+      else interpretation = "Minimal/No Depression";
+      
+      document.getElementById('phq-interpretation').value = interpretation;
+      return total;
+    }
+
+    // Generate the review of systems note
+    function generateROS() {
+      return `REVIEW OF SYSTEMS:
+Constitutional: ${getValueOrDefault('ros-constitutional', 'review')}
+HEENT: ${getValueOrDefault('ros-heent', 'review')}
+Cardiovascular: ${getValueOrDefault('ros-cv', 'review')}
+Respiratory: ${getValueOrDefault('ros-respiratory', 'review')}
+Gastrointestinal: ${getValueOrDefault('ros-gi', 'review')}
+Genitourinary: ${getValueOrDefault('ros-gu', 'review')}
+Musculoskeletal: ${getValueOrDefault('ros-ms', 'review')}
+Neurological: ${getValueOrDefault('ros-neuro', 'review')}
+${document.getElementById('ros-notes').value ? "\nNotes: " + document.getElementById('ros-notes').value : ""}`;
+    }
+
+    // Generate the physical exam note
+    function generatePE() {
+      return `PHYSICAL EXAMINATION:
+General: ${getValueOrDefault('pe-general', 'physical')}
+Vitals: ${getValueOrDefault('pe-vitals', 'physical')}
+HEENT: ${getValueOrDefault('pe-heent', 'physical')}
+Neck: ${getValueOrDefault('pe-neck', 'physical')}
+Chest/Lungs: ${getValueOrDefault('pe-lungs', 'physical')}
+Cardiovascular: ${getValueOrDefault('pe-cv', 'physical')}
+Abdomen: ${getValueOrDefault('pe-abd', 'physical')}
+Extremities: ${getValueOrDefault('pe-ext', 'physical')}
+Neurological: ${getValueOrDefault('pe-neuro', 'physical')}
+Skin: ${getValueOrDefault('pe-skin', 'physical')}
+${document.getElementById('pe-notes').value ? "\nNotes: " + document.getElementById('pe-notes').value : ""}`;
+    }
+
+    // Generate depression screening note
+    function generateDepression() {
+      const total = calculatePHQ();
+      return `DEPRESSION SCREENING (PHQ-9):
+Total Score: ${total} (${document.getElementById('phq-interpretation').value})
+
+1. Little interest/pleasure: ${document.getElementById('phq1').options[document.getElementById('phq1').selectedIndex].text}
+2. Feeling down/depressed: ${document.getElementById('phq2').options[document.getElementById('phq2').selectedIndex].text}
+3. Sleep problems: ${document.getElementById('phq3').options[document.getElementById('phq3').selectedIndex].text}
+4. Fatigue: ${document.getElementById('phq4').options[document.getElementById('phq4').selectedIndex].text}
+5. Appetite changes: ${document.getElementById('phq5').options[document.getElementById('phq5').selectedIndex].text}
+6. Feeling bad about self: ${document.getElementById('phq6').options[document.getElementById('phq6').selectedIndex].text}
+7. Concentration problems: ${document.getElementById('phq7').options[document.getElementById('phq7').selectedIndex].text}
+8. Psychomotor changes: ${document.getElementById('phq8').options[document.getElementById('phq8').selectedIndex].text}
+9. Suicidal thoughts: ${document.getElementById('phq9').options[document.getElementById('phq9').selectedIndex].text}
+
+${document.getElementById('phq-notes').value ? "Notes: " + document.getElementById('phq-notes').value : ""}`;
+    }
+
+    // Generate counseling note
+    function generateCounseling() {
+      let topic = document.getElementById('counseling-topic').value === 'other' 
+        ? document.getElementById('counseling-topic-other').value
+        : document.getElementById('counseling-topic').options[document.getElementById('counseling-topic').selectedIndex].text;
+      
+      return `PATIENT COUNSELING:
+Topic: ${topic}
+Duration: ${document.getElementById('counseling-duration').value} minutes
+Details: ${document.getElementById('counseling-details').value || "No details provided"}
+${document.getElementById('counseling-cpt').value ? "CPT Code: " + document.getElementById('counseling-cpt').value : ""}
+${document.getElementById('counseling-notes').value ? "\nNotes: " + document.getElementById('counseling-notes').value : ""}`;
+    }
+
+    // Generate GYN exam note
+    function generateGYN() {
+      return `GYNECOLOGICAL EXAM:
+Consent Obtained: ${document.getElementById('gyn-consent').value === 'yes' ? 'Yes' : 'No'}
+Chaperone Present: ${document.getElementById('gyn-chaperone').value === 'yes' ? 'Yes' : 'No'}
+
+External Genitalia: ${getValueOrDefault('gyn-external', 'gyn')}
+Speculum Exam: ${getValueOrDefault('gyn-speculum', 'gyn')}
+Bimanual Exam: ${getValueOrDefault('gyn-bimanual', 'gyn')}
+
+Patient Education: ${document.getElementById('gyn-education').value || "No education documented"}
+${document.getElementById('gyn-notes').value ? "\nNotes: " + document.getElementById('gyn-notes').value : ""}`;
+    }
+
+    // Generate foot exam note
+    function generateFoot() {
+      return `FOOT EXAM:
+Inspection: ${getValueOrDefault('foot-inspection', 'foot')}
+Vascular: ${getValueOrDefault('foot-vascular', 'foot')}
+Neurological: ${getValueOrDefault('foot-neuro', 'foot')}
+Monofilament Test: ${document.getElementById('foot-monofilament').options[document.getElementById('foot-monofilament').selectedIndex].text}
+${document.getElementById('foot-notes').value ? "\nNotes: " + document.getElementById('foot-notes').value : ""}`;
+    }
+
+    // Generate lab results note
+    function generateLabs() {
+      return `LABORATORY RESULTS:
+CBC:
+  WBC: ${getValueOrDefault('labs-wbc', 'labs')}
+  Hgb: ${getValueOrDefault('labs-hgb', 'labs')}
+  Hct: ${getValueOrDefault('labs-hct', 'labs')}
+  Platelets: ${getValueOrDefault('labs-plt', 'labs')}
+
+CMP:
+  Glucose: ${getValueOrDefault('labs-glucose', 'labs')}
+  BUN: ${getValueOrDefault('labs-bun', 'labs')}
+  Creatinine: ${getValueOrDefault('labs-creat', 'labs')}
+  Sodium: ${getValueOrDefault('labs-na', 'labs')}
+  Potassium: ${getValueOrDefault('labs-k', 'labs')}
+
+Lipid Panel:
+  Cholesterol: ${getValueOrDefault('labs-chol', 'labs')}
+  HDL: ${getValueOrDefault('labs-hdl', 'labs')}
+  LDL: ${getValueOrDefault('labs-ldl', 'labs')}
+  Triglycerides: ${getValueOrDefault('labs-trig', 'labs')}
+
+${document.getElementById('labs-other').value ? "Other Results:\n" + document.getElementById('labs-other').value : ""}
+${document.getElementById('labs-notes').value ? "\nNotes: " + document.getElementById('labs-notes').value : ""}`;
+    }
+
+    // Main generate function
+    function generateNote() {
+      const noteType = document.getElementById('note-type').value;
+      let note = '';
+
+      if (noteType === 'review') {
+        note = generateROS();
+      } 
+      else if (noteType === 'physical') {
+        note = generatePE();
+      }
+      else if (noteType === 'depression') {
+        note = generateDepression();
+      }
+      else if (noteType === 'counseling') {
+        note = generateCounseling();
+      }
+      else if (noteType === 'gyn') {
+        note = generateGYN();
+      }
+      else if (noteType === 'foot') {
+        note = generateFoot();
+      }
+      else if (noteType === 'labs') {
+        note = generateLabs();
+      }
+
+      document.getElementById('output').value = note;
+    }
+
+    // Copy to clipboard
+    function copyToClipboard() {
+      const output = document.getElementById('output');
+      output.select();
+      document.execCommand('copy');
+      alert('Note copied to clipboard!');
+    }
+
+    // Initialize PHQ-9 questions
+    for (let i = 1; i <= 9; i++) {
+      document.getElementById(`phq${i}`).addEventListener('change', calculatePHQ);
+    }
+
+    // Initialize counseling topic selector
+    document.getElementById('counseling-topic').addEventListener('change', function() {
+      document.getElementById('counseling-topic-other-container').style.display = 
+        this.value === 'other' ? 'block' : 'none';
+    });
+  </script>
+</body>
+</html>
